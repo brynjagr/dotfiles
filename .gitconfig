@@ -1,0 +1,14 @@
+[user]
+    name = Brynjar Rongved
+    email = brynjar.rongved@gmail.com
+[alias]
+    s = status
+    ci = commit
+    cm = commit -m
+    b = branch
+    logv = log --stat --abbrev-commit
+    pr = pull --rebase
+[core]
+    editor = vim
+[color]
+    ui = auto

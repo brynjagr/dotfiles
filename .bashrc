@@ -1,3 +1,5 @@
+[[ $- != *i*  ]] && return # check if shell is interactive
+
 if [ -f /local/lib/setupfiles/bashrc ] ; then
     source /local/lib/setupfiles/bashrc
 fi
@@ -12,16 +14,20 @@ if [ ! -f ~/.vimrc ] ; then
 fi
 
 unalias -a
+if `tty -s`; then
+    mesg n
+fi
 
 # Domain name
 domainname=`echo $HOSTNAME | cut -d . -f 2`
 
-# Hva heter maskinene dine akkurat nå?
-laptop='appelsin'
+# Name of your machines 
+arch='gaebora'
+laptop='kaepora'
 
 # Div
-HISTFILESIZE=10000
-HISTSIZE=10000
+HISTFILESIZE=20000
+HISTSIZE=20000
 HISTCONTROL=ignoredups:ignorespace
 HISTTIMEFORMAT='%F %T '
 HISTIGNORE='&:d:ls:lm:lm *'
@@ -41,53 +47,47 @@ LIGHT_GRAY='\[\033[0;37m\]'
 LIGHT_CYAN='\[\033[01;36m\]'
 LIGHT_PURPLE='\[\033[01;35m\]'
 BLUE='\[\033[01;34m\]'
+NO_COLOR='\[\033[00m\]'
 
-# Platform dependent 
+#Set editor
+export EDITOR=vim
 if [ "$(uname)" == "Darwin" ]; then  #OS X
-    export EDITOR=subl
+    if type "subl" > /dev/null 2>/dev/null; then
+        export EDITOR=code
+    fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then  #Linux
-    export EDITOR=gvim
+    if type "gvim" > /dev/null 2>/dev/null; then
+        export EDITOR=vim
+    fi
 fi
 
 ## DEVELOPMENT ##
+export NODE_ENV=development
+
 # Maven
 export MVN_OPTS="-XX:+CMSClassUnloadingEnabled -XX:PermSize=256M -XX:MaxPermSize=512M"
 
-# Domain dependent
-if [[ $domainname == "ifi" ]]; then
-    export PS1="$LIGHT_GREEN\u@\h:$BLUE\w \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]\$ "
-    
-    export PATH=/opt/texlive/uio-texmf/bin/x86_64-linux/:/snacks/bin:/usr/bin:/hom/termvakt/bin:/hom/peder/bin:$HOME/software/bin:$HOME/apache-maven-3.0.4/bin/:$HOME/software/idea-IC-133.330/bin:$HOME/postgres9.2/bin:$HOME/.local/bin$PATH
-    export JAVA_HOME=/local/store/localhost/.j2sdk/ver-7u7/opt/j2sdk\@amd64linux
-    export CLASSPATH="$HOME/javalibs/junit-4.4.jar:$HOME/software/junit4.10/junit-4.10.jar:$CLASSPATH"
-    export PYTHONPATH="$HOME/master/implementation/gtrackcore:$HOME/software/python_modules"
-
-    export LD_LIBRARY_PATH=$HOME/pgadmin/lib:$HOME/software/lib
-    export LIBPATH=$HOME/software/lib:$LIBPATH
-    export LIBRARY_PATH=$HOME/software/lib:$LIBPATH
-    export C_INCLUDE_PATH=$HOME/software/include:$C_INCLUDE_PATH
-    export CPLUS_INCLUDE_PATH=$HOME/software/include:$CPLUS_INCLUDE_PATH
-    export BOOST_PATH=$HOME/software/include
-    export BOOST_ROOT=$HOME/software/include
-
-    alias intellij="idea.sh"
-    alias a2ps="a2ps -f 10 -M A4 -2 -C -A virtual -o"
-    alias clock="tty-clock -c -C 3"
-    alias spotify='/snacks/bin/wine ~/.wine/drive_c/Program\ Files/Spotify/spotify.exe &'
-    alias gtrackcore="cd $HOME/master/implementation/gtrackcore"
-    alias master="cd $HOME/master/thesis"
-
+if [[ $domainname == $arch ]]; then
+    TERM='rxvt-unicode'
+    eval `dircolors ~/.dircolors/dircolors.256dark`
 elif [[ $domainname == $laptop ]]; then
-    export PS1="$LIGHT_GREEN\u@\h:$BLUE\w \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]\$ "
-    export PATH="/usr/local/bin:/opt/local/bin:/opt/local/sbin:$PATH"
-    export PYTHONPATH=/Users/brynjar/gtrackcore
+    export PS1="$LIGHT_GREEN\u@\h:$BLUE\w\[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$BLUE\$$NO_COLOR "
+    #export PS1="$DARK_GRAY\u@\h:$BLUE\w\[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$BLUE\$$NO_COLOR "
+    #export PS1="$LIGHT_CYAN\u@\h:$BLUE\w\[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$BLUE\$$NO_COLOR "
+    #export PS1="$DARK_GRAY\u@\h:$BLUE\w\[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$BLUE\$$NO_COLOR "
 fi
-
 if [ "$(uname)" == "Darwin" ]; then  #OS X
     alias ls='ls -G'       
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then  #Linux
     alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
 fi
+
+# ls colors
+export CLICOLOR=1
+export LSCOLORS=GxFxCxDxBxegedabagaced
 
 # div
 alias :q='exit'
@@ -96,18 +96,9 @@ alias ll='ls -l'
 alias la='ls -A'
 alias ..='cd ..'
 
-# SSH
-alias insilico='ssh brynjagr@insilico.hpc.uio.no'
-alias abel='ssh brynjagr@abel.uio.no'
-alias uio='ssh brynjagr@login.ifi.uio.no'
-alias diamant='ssh brynjagr@diamant.ifi.uio.no'
-
-# Remote desktop
-alias doze="windows window.ifi.uio.no"
-
-# soft
-alias ec="eclipse"
-alias p='python'
-
 # Irssi
 alias irc="screen -ls | grep -q irc && nice -n 17 screen -r -d irc || nice -n 17 screen -S irc irssi"
+
+# AWS
+alias awslogin='awsmfa -i mfa -t default --duration 129600'
+
